@@ -144,6 +144,23 @@ func (ss *ProxyDialer) Dial(network string, addr string) (con net.Conn, err erro
 			return nil, err
 		}
 		con, err = vmessDialer.Dial(network, addr)
+		if err != nil && ss.conf.ObfsParam != ss.conf.Server {
+			// log.Println("dial err:", err, "try again")
+			if ss.conf.Protocol == "ws" {
+				wsAddr := fmt.Sprintf("ws://%s:%d%s", ss.conf.Server, ss.conf.ServerPort, ss.conf.ProtocolParam)
+				predial, err = ws.NewWSDialer(wsAddr, nil)
+				if err != nil {
+					return nil, err
+				}
+			} else {
+				predial = tcp.DefaultTcpDialer{}
+			}
+			vmessDialer, err := vmess.NewVMessDialer(fmt.Sprintf("%s:%d", ss.conf.ObfsParam, ss.conf.ServerPort), ss.conf.OptUUID, ss.conf.Obfs, ss.conf.OptionID, predial)
+			if err != nil {
+				return nil, err
+			}
+			con, err = vmessDialer.Dial(network, addr)
+		}
 	case "ssr":
 		u := &url.URL{
 			Scheme: "ssr",

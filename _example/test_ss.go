@@ -1,9 +1,11 @@
 package main
 
 import (
+	"encoding/json"
 	"flag"
 	"fmt"
 	"log"
+	"net/http"
 	"strings"
 	"time"
 
@@ -19,7 +21,7 @@ func main() {
 	flag.Parse()
 
 	if url == "" {
-		url = "https://www.google.com"
+		url = "http://ifconfig.co/json"
 	}
 	if testurlorder != "" && strings.HasPrefix(testurlorder, "http") {
 
@@ -31,10 +33,23 @@ func main() {
 			if res, err := client.Get(url); err != nil {
 				return err
 			} else {
-				return res.StatusCode
+				return res
 			}
 		}, bar) {
-			fmt.Println(k[:10], v)
+			switch v.(type) {
+			case error:
+				log.Println(v.(error))
+				log.Println("conf : ", k)
+				c, _ := merkur.ParseUri(k)
+				log.Println(c)
+			case *http.Response:
+				res := v.(*http.Response)
+				r, _ := json.MarshalIndent(res.Header, "", "\t")
+				// c, _ := merkur.ParseUri(k)
+				fmt.Println(res.StatusCode, string(r), k)
+
+			}
+
 		}
 
 	} else {

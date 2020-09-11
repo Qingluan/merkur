@@ -112,7 +112,6 @@ func (pool *ProxyPool) LoopOneTurn(doWhat func(proxyDialer Dialer) interface{}, 
 
 	go func() {
 		for one := range taskRes {
-
 			if one.uri == "[stop]" {
 				break
 			}
@@ -120,10 +119,6 @@ func (pool *ProxyPool) LoopOneTurn(doWhat func(proxyDialer Dialer) interface{}, 
 				bar.Increment()
 				bar.Update()
 			}
-			// switch one.res.(type) {
-			// case error:
-			// 	log.Println(one.uri, one.res.(error))
-			// default:
 			o[one.uri] = one.res
 
 			// }
