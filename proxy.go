@@ -118,6 +118,7 @@ func NewProxyDialer(proxyObj interface{}) (dialer proxy.Dialer) {
 			dialer := Socks5Dialer(proxyObj.(string))
 			return dialer
 		}
+		// } else if strings.HasPrefix(proxyObj.(string))
 	}
 	return
 

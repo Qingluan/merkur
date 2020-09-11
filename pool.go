@@ -1,6 +1,7 @@
 package merkur
 
 import (
+	"log"
 	"math/rand"
 	"strings"
 	"sync"
@@ -46,12 +47,25 @@ func NewProxyPool(url ...string) (proxyPool *ProxyPool) {
 			res:          make(map[string]int),
 			lastDownload: time.Now(),
 		}
-		for no, i := range config.ParseOrding(url[0]) {
-			proxyPool.res[i] = no
+		switch url[0][:5] {
+		case "ss://":
+			proxyPool.res[url[0]] = 0
+		case "ssr:/":
+			proxyPool.res[url[0]] = 0
+		case "vmess":
+			proxyPool.res[url[0]] = 0
+		case "socks":
+			proxyPool.res[url[0]] = 0
+		case "http:":
+			for no, i := range config.ParseOrding(url[0]) {
+				proxyPool.res[i] = no
+			}
+			lock.Lock()
+			defer lock.Unlock()
+			OrderHistory[url[0]] = proxyPool
+		default:
+			log.Println("agly url :", url[0])
 		}
-		lock.Lock()
-		defer lock.Unlock()
-		OrderHistory[url[0]] = proxyPool
 	} else {
 		proxyPool = &ProxyPool{
 			res: make(map[string]int),
