@@ -15,11 +15,13 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+	"time"
 )
 
 var (
 	IPMATCH      = regexp.MustCompile(`[\d\.]+`)
 	InvalidSSURI = errors.New("Not Validat SSURI ")
+	Timeout      = time.Second * 10
 )
 
 type Config struct {
