@@ -41,6 +41,8 @@ func main() {
 		if client := merkur.NewProxyHttpClient(testurlorder); client != nil {
 			st := time.Now()
 			if res, err := client.Get(url); err != nil {
+				conf, ierr := merkur.ParseUri(testurlorder)
+				fmt.Println(conf, ierr)
 				log.Println("used:", time.Now().Sub(st), "err:", err)
 			} else {
 				c, e := merkur.ParseUri(testurlorder)

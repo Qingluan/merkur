@@ -117,6 +117,10 @@ func ParseVmessUri(u string) (cfg Config, err error) {
 		cfg.Server = host.(string)
 	}
 
+	if netAddr, ok := s["add"]; ok {
+		cfg.ObfsParam = netAddr.(string)
+	}
+
 	if ports, ok := s["port"]; ok {
 		cfg.ServerPort = int(ports.(float64))
 

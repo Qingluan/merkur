@@ -131,7 +131,7 @@ func (ss *ProxyDialer) Dial(network string, addr string) (con net.Conn, err erro
 	case "vmess":
 		var predial proxy.Dialer
 		if ss.conf.Protocol == "ws" {
-			wsAddr := fmt.Sprintf("ws://%s:%d%s", ss.conf.Server, ss.conf.ServerPort, ss.conf.ProtocolParam)
+			wsAddr := fmt.Sprintf("ws://%s:%d%s", ss.conf.ObfsParam, ss.conf.ServerPort, ss.conf.ProtocolParam)
 			predial, err = ws.NewWSDialer(wsAddr, nil)
 			if err != nil {
 				return
