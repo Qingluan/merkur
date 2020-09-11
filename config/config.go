@@ -249,6 +249,7 @@ func ParseSSUri(u string) (cfg Config, err error) {
 func ParseOrding(urlOrbuf string) (ssuri []string) {
 	raw := []byte{}
 	if strings.HasPrefix(urlOrbuf, "http") {
+		log.Println("download all proxy configs : ", urlOrbuf)
 		if res, err := http.Get(urlOrbuf); err == nil {
 			// var raw []byte
 			switch res.Header.Get("Content-Encoding") {
@@ -263,6 +264,8 @@ func ParseOrding(urlOrbuf string) (ssuri []string) {
 			default:
 				raw, _ = ioutil.ReadAll(res.Body)
 			}
+		} else {
+			log.Println("no proxy config in url :", urlOrbuf)
 		}
 	} else {
 		raw = []byte(urlOrbuf)

@@ -4,9 +4,12 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"net/http"
+	"os"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/Qingluan/merkur"
@@ -16,14 +19,44 @@ import (
 func main() {
 	var testurlorder string
 	var url string
+	var testflow bool
 	flag.StringVar(&testurlorder, "o", "", "order url or ssr/ss uri")
 	flag.StringVar(&url, "u", "", "target test")
+	flag.BoolVar(&testflow, "f", false, "test flow order")
+
 	flag.Parse()
 
 	if url == "" {
 		url = "http://ifconfig.co/json"
 	}
 	if testurlorder != "" && strings.HasPrefix(testurlorder, "http") {
+		if testflow {
+			var wait sync.WaitGroup
+			for i := 0; i < 10; i++ {
+				wait.Add(1)
+				client := merkur.NewProxyHttpClient(testurlorder)
+
+				go func(client *http.Client) {
+
+					defer wait.Done()
+					res, err := client.Get(url)
+					if err != nil {
+						// panic(err)
+						log.Println("Get err:", err)
+						return
+					}
+					buf, err := ioutil.ReadAll(res.Body)
+					if err != nil {
+						log.Println(err)
+					}
+					fmt.Println(string(buf))
+
+				}(client)
+
+			}
+			wait.Wait()
+			os.Exit(0)
+		}
 
 		proxyPool := merkur.NewProxyPool(testurlorder)
 		bar := pb.New(proxyPool.Count())

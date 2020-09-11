@@ -206,13 +206,20 @@ func (proxyPool *ProxyPool) Add(url string) {
 func (pool *ProxyPool) Merge(ppool ProxyPool) {
 	oldnum := len(pool.res)
 	for k := range ppool.res {
-		pool.res[k] = oldnum
-		oldnum++
+		if _, ok := pool.res[k]; !ok {
+			pool.res[k] = oldnum
+			oldnum++
+		}
 	}
 }
 
 func (pool *ProxyPool) Get() (outuri string) {
 	var u string
+	defer func() {
+		pool.now++
+		pool.now %= len(pool.res)
+	}()
+
 	if pool.Mode == Random {
 		// i :=
 		ii := rand.Int() % len(pool.res)
@@ -223,14 +230,22 @@ func (pool *ProxyPool) Get() (outuri string) {
 		}
 	} else {
 		for u, i := range pool.res {
+			// log.Println(pool.now, u, i)
 			if i == pool.now%len(pool.res) {
 				return u
 			}
 		}
 	}
-	defer func() {
-		pool.now++
-		pool.now %= len(pool.res)
-	}()
 	return u
+}
+
+func (pool *ProxyPool) GetDialer() (dialer Dialer) {
+	if url := pool.Get(); url != "" {
+		if dialer, err := NewDialerByURI(url); err == nil {
+			return dialer
+		} else {
+			log.Println("GetDialer error:", err)
+		}
+	}
+	return
 }
