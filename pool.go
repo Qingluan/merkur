@@ -177,7 +177,7 @@ func (proxyPool *ProxyPool) Urls() (urls []string) {
 func (proxyPool *ProxyPool) Add(url string) {
 	oldNum := len(proxyPool.res)
 	if strings.HasPrefix(url, "http") {
-		if k, ok := OrderHistory[url]; ok && time.Now().Sub(k.lastDownload) < 1*time.Minute {
+		if k, ok := OrderHistory[url]; ok {
 			proxyPool.Merge(*k)
 			// lock.Lock()
 			// defer lock.Unlock()

@@ -34,9 +34,11 @@ func main() {
 			var wait sync.WaitGroup
 			for i := 0; i < 10; i++ {
 				wait.Add(1)
-				client := merkur.NewProxyHttpClient(testurlorder)
 
-				go func(client *http.Client) {
+				// go func(client *http.Client) {
+
+				go func() {
+					client := merkur.NewProxyHttpClient(testurlorder)
 
 					defer wait.Done()
 					res, err := client.Get(url)
@@ -50,8 +52,8 @@ func main() {
 						log.Println(err)
 					}
 					fmt.Println(string(buf))
-
-				}(client)
+				}()
+				// }(client)
 
 			}
 			wait.Wait()
