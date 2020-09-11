@@ -56,6 +56,13 @@ func NewProxyPool(url ...string) (proxyPool *ProxyPool) {
 			proxyPool.res[url[0]] = 0
 		case "socks":
 			proxyPool.res[url[0]] = 0
+		case "https":
+			for no, i := range config.ParseOrding(url[0]) {
+				proxyPool.res[i] = no
+			}
+			lock.Lock()
+			defer lock.Unlock()
+			OrderHistory[url[0]] = proxyPool
 		case "http:":
 			for no, i := range config.ParseOrding(url[0]) {
 				proxyPool.res[i] = no
@@ -63,6 +70,7 @@ func NewProxyPool(url ...string) (proxyPool *ProxyPool) {
 			lock.Lock()
 			defer lock.Unlock()
 			OrderHistory[url[0]] = proxyPool
+
 		default:
 			log.Println("agly url :", url[0])
 		}
