@@ -10,6 +10,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/Qingluan/merkur/torrc"
+
 	"github.com/Qingluan/merkur/config"
 	"github.com/Qingluan/merkur/shadowsocks/cipher"
 	"github.com/Qingluan/merkur/shadowsocksr"
@@ -114,6 +116,13 @@ func NewProxyDialer(proxyObj interface{}) (dialer proxy.Dialer) {
 				return
 			}
 			return dial
+		} else if strings.HasPrefix(proxyObj.(string), "tor://") {
+			dialer, err := torrc.NewTorDialer()
+			if err != nil {
+				log.Println("failed use tor proxy dialer:", err)
+				return nil
+			}
+			return dialer
 		} else if strings.HasPrefix(proxyObj.(string), "socks5://") {
 			dialer := Socks5Dialer(proxyObj.(string))
 			return dialer

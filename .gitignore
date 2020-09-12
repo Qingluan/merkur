@@ -13,4 +13,5 @@
 
 # Dependency directories (remove the comment below to include it)
 # vendor/
-_example/_example
+_example/simple_test/simple_test
+_example/tor_test/tor_test
