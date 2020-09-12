@@ -3,6 +3,9 @@ package torrc
 import (
 	"context"
 	"fmt"
+	"net"
+	"os"
+	"strings"
 	"time"
 
 	"github.com/cretz/bine/tor"
@@ -17,6 +20,7 @@ var (
 		0,
 		nil,
 	}
+	LocalService = TestIfServiceStartLocal()
 )
 
 func IsStart() bool {
@@ -39,7 +43,22 @@ func StartTor() (err error) {
 	return
 }
 
+func Socks5Dialer(addr string) (proxy.Dialer, error) {
+	if strings.HasPrefix(addr, "socks5") {
+		addr = strings.SplitN(addr, "://", 2)[1]
+	}
+	dialer, err := proxy.SOCKS5("tcp", addr, nil, proxy.Direct)
+	if err != nil {
+		fmt.Fprintln(os.Stderr, "can't connect to the proxy:", err)
+	}
+	return dialer, err
+}
+
 func NewTorDialer() (dialer proxy.Dialer, err error) {
+	if LocalService {
+		return Socks5Dialer("localhost:9050")
+	}
+
 	if !IsStart() {
 		if err = StartTor(); err != nil {
 			return
@@ -50,4 +69,17 @@ func NewTorDialer() (dialer proxy.Dialer, err error) {
 	dialCtx, _ := context.WithTimeout(context.Background(), time.Minute)
 	dialer, err = TorService.Service.Dialer(dialCtx, nil)
 	return
+}
+
+func TestIfServiceStartLocal() bool {
+	if _, err := os.Stat("/etc/tor/torrc"); err == nil {
+		c, err := net.Dial("tcp", "localhost:9050")
+		if err != nil {
+			return false
+		} else {
+			defer c.Close()
+			return true
+		}
+	}
+	return false
 }
