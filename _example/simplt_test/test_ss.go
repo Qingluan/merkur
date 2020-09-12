@@ -27,8 +27,9 @@ func main() {
 	flag.Parse()
 
 	if url == "" {
-		url = "http://ifconfig.co/json"
+		url = "http://ifconfig.co/ip"
 	}
+	merkur.DefaultProxyPool.Add(testurlorder)
 	if testurlorder != "" && strings.HasPrefix(testurlorder, "http") {
 		if testflow {
 			var wait sync.WaitGroup
