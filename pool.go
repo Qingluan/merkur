@@ -219,9 +219,11 @@ func (pool *ProxyPool) Merge(ppool ProxyPool) {
 
 func (pool *ProxyPool) Get() (outuri string) {
 	var u string
+	lock.Lock()
 	defer func() {
 		pool.now++
 		pool.now %= len(pool.res)
+		lock.Unlock()
 	}()
 
 	if pool.Mode == Random {
