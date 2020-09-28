@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/Qingluan/merkur/config"
+	"golang.org/x/net/proxy"
 )
 
 const (
@@ -238,6 +239,7 @@ func (pool *ProxyPool) Get() (outuri string) {
 		for u, i := range pool.res {
 			// log.Println(pool.now, u, i)
 			if i == pool.now%len(pool.res) {
+				// fmt.Println(i, u)
 				return u
 			}
 		}
@@ -245,7 +247,18 @@ func (pool *ProxyPool) Get() (outuri string) {
 	return u
 }
 
-func (pool *ProxyPool) GetDialer() (dialer Dialer) {
+func (pool *ProxyPool) GetDialer2() (dialer Dialer) {
+	if url := pool.Get(); url != "" {
+		if dialer, err := NewDialerByURI(url); err == nil {
+			return dialer
+		} else {
+			log.Println("GetDialer error:", err)
+		}
+	}
+	return
+}
+
+func (pool *ProxyPool) GetDialer() (dialer proxy.Dialer) {
 	if url := pool.Get(); url != "" {
 		if dialer, err := NewDialerByURI(url); err == nil {
 			return dialer

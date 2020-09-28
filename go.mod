@@ -3,6 +3,7 @@ module github.com/Qingluan/merkur
 go 1.14
 
 require (
+	github.com/Qingluan/jupyter v1.0.2
 	github.com/aead/chacha20 v0.0.0-20180709150244-8b13a72661da
 	github.com/cheggaaa/pb v1.0.29
 	github.com/cretz/bine v0.1.0
@@ -16,6 +17,6 @@ require (
 	github.com/oliver006/ws-client v0.2.0 // indirect
 	gitlab.com/yawning/chacha20.git v0.0.0-20190903091407-6d1cb28dc72c
 	golang.org/x/crypto v0.0.0-20200820211705-5c72a883971a
-	golang.org/x/net v0.0.0-20200822124328-c89045814202
+	golang.org/x/net v0.0.0-20200927032502-5d4f70055728
 	gopkg.in/readline.v1 v1.0.0-20160726135117-62c6fe619375 // indirect
 )
