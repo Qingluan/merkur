@@ -94,6 +94,10 @@ func (proxyPool *ProxyPool) Count() int {
 	return len(proxyPool.res)
 }
 
+func (pool *ProxyPool) SetMode(i int) {
+	pool.Mode = i
+}
+
 func (pool *ProxyPool) LoopOneTurn(doWhat func(proxyDialer Dialer) interface{}, processor ...ProgressBar) (o map[string]interface{}) {
 	// ordnum := len(pool.res)
 	o = make(map[string]interface{})

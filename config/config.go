@@ -280,6 +280,7 @@ func ParseOrding(urlOrbuf string) (ssuri []string) {
 	for _, uri := range bytes.Split(de, []byte("\n")) {
 		one := strings.TrimSpace(string(uri))
 		if strings.Contains(one, "://") {
+		//log.Println(one)
 			ssuri = append(ssuri, one)
 		}
 	}
