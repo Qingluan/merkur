@@ -25,6 +25,7 @@ package ws
 import (
 	"bytes"
 	"encoding/binary"
+	"errors"
 	"io"
 	"math/rand"
 	"sync"
@@ -158,6 +159,9 @@ func FrameReader(r io.Reader) io.Reader {
 func (r *frameReader) Read(b []byte) (int, error) {
 	if r.left == 0 {
 		// get msg header
+		if len(r.buf) < 2 {
+			return 0, errors.New("Fromae init error: less than 2")
+		}
 		_, err := io.ReadFull(r.Reader, r.buf[:2])
 		if err != nil {
 			return 0, err

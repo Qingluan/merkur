@@ -57,7 +57,9 @@ func (c *Conn) Handshake(host, path string) error {
 	buf.WriteString("Sec-WebSocket-Key: " + clientKey + "\r\n")
 	buf.WriteString("Sec-WebSocket-Protocol: binary\r\n")
 	buf.WriteString("Sec-WebSocket-Version: 13\r\n")
-	buf.WriteString(("\r\n"))
+	if _, err := buf.WriteString(("\r\n")); err != nil {
+		return err
+	}
 
 	if _, err := c.Conn.Write(buf.Bytes()); err != nil {
 		return err
@@ -95,6 +97,9 @@ func (c *Conn) Write(b []byte) (n int, err error) {
 }
 
 func (c *Conn) Read(b []byte) (n int, err error) {
+	if c == nil {
+		return 0, errors.New("no conn init!!!!")
+	}
 	if c.reader == nil {
 		c.reader = FrameReader(c.Conn)
 	}
