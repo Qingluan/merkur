@@ -1,6 +1,7 @@
 package main
 
 import (
+	"crypto/tls"
 	"encoding/json"
 	"flag"
 	"fmt"
@@ -89,9 +90,22 @@ func main() {
 		}
 
 	} else {
-		if client := merkur.NewProxyHttpClient(testurlorder); client != nil {
-			st := time.Now()
+		st := time.Now()
+		//
+		if dialer, err := merkur.NewDialerByURI(testurlorder); err == nil {
+			tout := time.Second * 8
+			transport := http.Transport{
+				ResponseHeaderTimeout: tout,
+				TLSClientConfig:       &tls.Config{InsecureSkipVerify: true},
+				Dial:                  dialer.Dial,
+			}
+
+			client := &http.Client{
+				Transport: &transport,
+				Timeout:   tout,
+			}
 			if res, err := client.Get(url); err != nil {
+				// panic(err)
 				conf, ierr := merkur.ParseUri(testurlorder)
 				fmt.Println(conf, ierr)
 				log.Println("used:", time.Now().Sub(st), "err:", err)
@@ -103,6 +117,24 @@ func main() {
 				log.Println("used:", time.Now().Sub(st), "code:", res.StatusCode, "proxy:", c.Server)
 
 			}
+		} else {
+			panic(err)
 		}
+		// if client := merkur.NewProxyHttpClient(testurlorder); client != nil {
+		// 	st := time.Now()
+		// 	if res, err := client.Get(url); err != nil {
+		// 		// panic(err)
+		// 		conf, ierr := merkur.ParseUri(testurlorder)
+		// 		fmt.Println(conf, ierr)
+		// 		log.Println("used:", time.Now().Sub(st), "err:", err)
+		// 	} else {
+		// 		c, e := merkur.ParseUri(testurlorder)
+		// 		if e != nil {
+		// 			log.Println(e)
+		// 		}
+		// 		log.Println("used:", time.Now().Sub(st), "code:", res.StatusCode, "proxy:", c.Server)
+
+		// 	}
+		// }
 	}
 }

@@ -64,6 +64,7 @@ func (s *VMess) Addr() string {
 
 // Dial connects to the address addr on the network net via the proxy.
 func (s *VMess) Dial(network, addr string) (net.Conn, error) {
+	// log.Println(s)
 	rc, err := s.dialer.Dial("tcp", s.addr)
 	if err != nil {
 		return nil, err

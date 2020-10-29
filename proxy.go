@@ -44,7 +44,7 @@ func NewDialer(ssconf config.Config) (dialer *ProxyDialer, err error) {
 	dialer = new(ProxyDialer)
 	dialer.conf = ssconf
 	dialer.url = fmt.Sprintf("%s:%d", ssconf.Server, ssconf.ServerPort)
-	if dialer.conf.Server == "" {
+	if dialer.conf.Server == "" && dialer.conf.ObfsParam == "" {
 		err = config.InvalidSSURI
 	}
 	return
@@ -58,7 +58,7 @@ func NewDialerByURI(ssuri string) (dialer *ProxyDialer, err error) {
 		return
 	}
 	// fmt.Println(dialer.conf)
-	if dialer.conf.Server == "" {
+	if dialer.conf.Server == "" && dialer.conf.ObfsParam == "" {
 		err = config.InvalidSSURI
 	}
 	return
@@ -152,6 +152,7 @@ func (ss *ProxyDialer) Dial(network string, addr string) (con net.Conn, err erro
 		}
 		vmessDialer, err := vmess.NewVMessDialer(fmt.Sprintf("%s:%d", ss.conf.Server, ss.conf.ServerPort), ss.conf.OptUUID, ss.conf.Obfs, ss.conf.OptionID, predial)
 		if err != nil {
+			// panic(err)
 			return nil, err
 		}
 		con, err = vmessDialer.Dial(network, addr)
@@ -161,6 +162,7 @@ func (ss *ProxyDialer) Dial(network string, addr string) (con net.Conn, err erro
 				wsAddr := fmt.Sprintf("ws://%s:%d%s", ss.conf.Server, ss.conf.ServerPort, ss.conf.ProtocolParam)
 				predial, err = ws.NewWSDialer(wsAddr, nil)
 				if err != nil {
+					// panic(err)
 					return nil, err
 				}
 			} else {
@@ -168,6 +170,7 @@ func (ss *ProxyDialer) Dial(network string, addr string) (con net.Conn, err erro
 			}
 			vmessDialer, err := vmess.NewVMessDialer(fmt.Sprintf("%s:%d", ss.conf.ObfsParam, ss.conf.ServerPort), ss.conf.OptUUID, ss.conf.Obfs, ss.conf.OptionID, predial)
 			if err != nil {
+				// panic(err)
 				return nil, err
 			}
 			con, err = vmessDialer.Dial(network, addr)

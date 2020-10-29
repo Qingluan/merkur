@@ -105,6 +105,8 @@ func ParseVmessUri(u string) (cfg Config, err error) {
 	}
 	if dats, err = b64decode(u); err != nil {
 		return
+	} else {
+		// log.Println(dats)
 	}
 	s := make(map[string]interface{})
 	err = json.Unmarshal([]byte(dats), &s)
@@ -115,6 +117,11 @@ func ParseVmessUri(u string) (cfg Config, err error) {
 		return
 	}
 	// fmt.Println(s)
+
+	// ---------------------------------------
+	// ---------------------------------------
+	// ---------------------------------------
+
 	if host, ok := s["host"]; ok {
 		cfg.Server = host.(string)
 	}
@@ -123,18 +130,34 @@ func ParseVmessUri(u string) (cfg Config, err error) {
 		cfg.ObfsParam = netAddr.(string)
 	}
 
+	// if host, ok := s["add"]; ok {
+	// 	cfg.Server = host.(string)
+	// }
+
+	// if netAddr, ok := s["host"]; ok {
+	// 	cfg.ObfsParam = netAddr.(string)
+	// }
+
+	// ---------------------------------------
+	// ---------------------------------------
+	// ---------------------------------------
+
+	// if netAddr,ok := s[""]
+
 	if ports, ok := s["port"]; ok {
 		cfg.ServerPort = int(ports.(float64))
 
 	}
 	if aids, ok := s["aid"]; ok {
+		// cfg.OptionID, _ = strconv.Atoi(aids.(string))
 		cfg.OptionID = int(aids.(float64))
-
 	}
 	if proto, ok := s["net"]; ok {
 		cfg.Protocol = proto.(string)
 		if cfg.Protocol == "ws" {
 			cfg.ProtocolParam = s["path"].(string)
+		} else if cfg.ObfsParam != "" && cfg.Server == "" {
+			cfg.Server = cfg.ObfsParam
 		}
 	}
 
@@ -143,7 +166,12 @@ func ParseVmessUri(u string) (cfg Config, err error) {
 	}
 
 	if sectype, ok := s["type"]; ok {
-		cfg.Obfs = sectype.(string)
+		if sectype == nil {
+			cfg.Obfs = ""
+		} else {
+			cfg.Obfs = sectype.(string)
+		}
+		// cfg.Obfs = sectype.(string)
 	}
 	cfg.ConfigType = "vmess"
 	return
@@ -280,7 +308,7 @@ func ParseOrding(urlOrbuf string) (ssuri []string) {
 	for _, uri := range bytes.Split(de, []byte("\n")) {
 		one := strings.TrimSpace(string(uri))
 		if strings.Contains(one, "://") {
-		//log.Println(one)
+			//log.Println(one)
 			ssuri = append(ssuri, one)
 		}
 	}
