@@ -8,7 +8,8 @@ import (
 
 	"github.com/Qingluan/merkur"
 	"github.com/Qingluan/merkur/socks5"
-	"github.com/martinlindhe/notify"
+
+	// "github.com/martinlindhe/notify"
 	"golang.org/x/net/proxy"
 )
 
@@ -41,7 +42,7 @@ func Listen() (err error) {
 	// dialer := merkur.NewProxyDialer(NowConfig)
 	log.Println("Set proxy:", NowConfig, " Listen:", Configs.ListenHost)
 
-	notify.Notify("FrameV2", "Start", Configs.ListenHost, "")
+	// log.Println("FrameV2", "Start", Configs.ListenHost, "")
 
 	for {
 		if TO_STOP {
@@ -98,7 +99,7 @@ func handleSocks5TcpAndUDP(p1 net.Conn, dialer proxy.Dialer) {
 
 func LogErr(err error) bool {
 	if err != nil {
-		notify.Alert("FrameV2", "Error info:", err.Error(), "")
+		// notify.Alert("FrameV2", "Error info:", err.Error(), "")
 		return true
 	}
 	return false
@@ -118,7 +119,7 @@ func handleBody(p1 net.Conn, dialer proxy.Dialer, host string) {
 			return
 		}
 		if p2 == nil {
-			notify.Notify("Frame2", "error", "p2 is not connected", "")
+			// log.Println("Frame2", "error", "p2 is not connected", "")
 			return
 		}
 		if p1 != nil && p2 != nil {
@@ -132,10 +133,10 @@ func handleBody(p1 net.Conn, dialer proxy.Dialer, host string) {
 			// PipeOne(p2, p1)
 			socks5.Pipe(p1, p2)
 		} else {
-			notify.Notify("Frame2", "err", "connection is not connected!", "")
+			log.Println("Frame2", "err", "connection is not connected!", "")
 		}
 	} else {
-		notify.Notify("Frame2", "error", "No set Proxy item", "")
+		// log.Println("Frame2", "error", "No set Proxy item", "")
 		return
 	}
 }
