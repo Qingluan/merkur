@@ -51,8 +51,10 @@ func NewDialer(ssconf config.Config) (dialer *ProxyDialer, err error) {
 }
 
 func NewDialerByURI(ssuri string) (dialer *ProxyDialer, err error) {
+
 	dialer = new(ProxyDialer)
 	dialer.conf, err = config.ParseSSUri(ssuri)
+	log.Println("use uri:", dialer.conf.String())
 	dialer.url = ssuri
 	if err != nil {
 		return
@@ -157,7 +159,7 @@ func (ss *ProxyDialer) Dial(network string, addr string) (con net.Conn, err erro
 		}
 		con, err = vmessDialer.Dial(network, addr)
 		if err != nil && ss.conf.ObfsParam != ss.conf.Server {
-			// log.Println("dial err:", err, "try again")
+			log.Println("dial err:", err, "try again")
 			if ss.conf.Protocol == "ws" {
 				wsAddr := fmt.Sprintf("ws://%s:%d%s", ss.conf.Server, ss.conf.ServerPort, ss.conf.ProtocolParam)
 				predial, err = ws.NewWSDialer(wsAddr, nil)

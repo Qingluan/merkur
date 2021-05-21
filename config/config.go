@@ -39,6 +39,7 @@ type Config struct {
 	ProtocolParam string `json:"protocol-param"`
 	OptionID      int    `json:"aid"`
 	OptUUID       string `json:"uuid"`
+	ID            string `json:"ps"`
 }
 
 func ToConfig(uri string) (cfg Config) {
@@ -173,6 +174,11 @@ func ParseVmessUri(u string) (cfg Config, err error) {
 		}
 		// cfg.Obfs = sectype.(string)
 	}
+
+	if name, ok := s["ps"]; ok {
+		cfg.ID = name.(string)
+	}
+
 	cfg.ConfigType = "vmess"
 	return
 }
