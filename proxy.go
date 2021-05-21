@@ -54,7 +54,7 @@ func NewDialerByURI(ssuri string) (dialer *ProxyDialer, err error) {
 
 	dialer = new(ProxyDialer)
 	dialer.conf, err = config.ParseSSUri(ssuri)
-	log.Println("use uri:", dialer.conf.String())
+	// log.Println("use uri:", dialer.conf.String())
 	dialer.url = ssuri
 	if err != nil {
 		return

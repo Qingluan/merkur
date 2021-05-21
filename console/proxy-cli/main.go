@@ -88,7 +88,7 @@ func handleSocks5TcpAndUDP(p1 net.Conn, dialer proxy.Dialer) {
 	// utils.ColorL("socks5 UDP-->", host)
 	// } else {
 
-	log.Println("socks5 -->", host)
+	// log.Println("socks5 -->", host)
 	// }
 	if err != nil {
 		LogErr(err)
@@ -113,7 +113,7 @@ func handleBody(p1 net.Conn, dialer proxy.Dialer, host string) {
 
 		}
 		p2, err := dialer.Dial("tcp", host)
-		log.Println("connecting ->", host)
+		// log.Println("connecting ->", host)
 		if err != nil {
 			log.Println("Err", "error", err.Error(), "")
 			return
@@ -123,7 +123,7 @@ func handleBody(p1 net.Conn, dialer proxy.Dialer, host string) {
 			return
 		}
 		if p1 != nil && p2 != nil {
-			log.Println("connect ->", host)
+			// log.Println("connect ->", host)
 			_, err = p1.Write(Socks5ConnectedRemote)
 			if err != nil {
 				LogErr(err)
