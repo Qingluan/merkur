@@ -1,6 +1,7 @@
 package merkur
 
 import (
+	"io/ioutil"
 	"log"
 	"math/rand"
 	"strings"
@@ -218,13 +219,66 @@ func (pool *ProxyPool) Merge(ppool ProxyPool) {
 	}
 }
 
+func (pool *ProxyPool) Remove(u string) {
+	lock.Lock()
+	defer lock.Unlock()
+	c, _ := ParseUri(u)
+	log.Print("[-]: ", c.Server, c.ID)
+	delete(pool.res, u)
+}
+
+func (pool *ProxyPool) TestAll(url string) {
+	if url == "" {
+		url = "https://ifconfig.me"
+	}
+
+	var waits sync.WaitGroup
+	for i := 0; i < 10; i++ {
+		waits.Add(1)
+
+		// go func(client *http.Client) {
+		proxyUrl := pool.Get()
+		go func(proxyUrl string, wait *sync.WaitGroup) {
+			client := NewProxyHttpClient(proxyUrl)
+
+			defer wait.Done()
+			res, err := client.Get(url)
+			if err != nil {
+				// panic(err)
+
+				pool.Remove(proxyUrl)
+				// log.Println("Get err:", err)
+				return
+			}
+			_, err = ioutil.ReadAll(res.Body)
+			if err != nil {
+				// log.Println(err)
+				pool.Remove(proxyUrl)
+			} else {
+				c, _ := ParseUri(proxyUrl)
+				log.Println("[ok] :", c.Server, c.ID)
+			}
+			// fmt.Println(string(buf))
+		}(proxyUrl, &waits)
+		// }(client)
+
+	}
+	waits.Wait()
+	// cc := len(pool.res)
+	n := 0
+	for u := range pool.res {
+		pool.res[u] = n
+		n++
+	}
+}
+
 func (pool *ProxyPool) Get() (outuri string) {
 	var u string
-	lock.Lock()
+	// lock.Lock()
 	defer func() {
 		pool.now++
-		pool.now %= len(pool.res)
-		lock.Unlock()
+		// 	pool.now %= len(pool.res)
+		// 	lock.Unlock()
 	}()
 
 	if pool.Mode == Random {
@@ -249,6 +303,8 @@ func (pool *ProxyPool) Get() (outuri string) {
 
 func (pool *ProxyPool) GetDialer2() (dialer Dialer) {
 	if url := pool.Get(); url != "" {
+		c, _ := ParseUri(url)
+		log.Println("Use:", c.Server, c.ID)
 		if dialer, err := NewDialerByURI(url); err == nil {
 			return dialer
 		} else {
@@ -260,6 +316,8 @@ func (pool *ProxyPool) GetDialer2() (dialer Dialer) {
 
 func (pool *ProxyPool) GetDialer() (dialer proxy.Dialer) {
 	if url := pool.Get(); url != "" {
+		c, _ := ParseUri(url)
+		log.Println("Use:", c.Server, c.ID)
 		if dialer, err := NewDialerByURI(url); err == nil {
 			return dialer
 		} else {

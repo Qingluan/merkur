@@ -4,7 +4,9 @@ import (
 	"flag"
 	"log"
 	"net"
+	"os"
 	"strings"
+	"time"
 
 	"github.com/Qingluan/merkur"
 	"github.com/Qingluan/merkur/socks5"
@@ -19,6 +21,7 @@ var (
 	NowConfig             = ""
 	Socks5ConnectedRemote = []byte{0x05, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x08, 0x43}
 	Configs               = Init()
+	DefaultPool           = merkur.DefaultProxyPool
 )
 
 type ConfigK struct {
@@ -33,8 +36,33 @@ func Init() ConfigK {
 	}
 }
 
-func Listen() (err error) {
+func Listen(testUrl string) (err error) {
 	ln, err := net.Listen("tcp", Configs.ListenHost)
+	ln2, err2 := net.Listen("tcp", Configs.ListenHost+"0")
+	if err2 != nil {
+		log.Fatal(err2)
+	}
+	go func() {
+
+		for {
+			p, err := ln2.Accept()
+			log.Println("try add new proxy.....")
+			if err != nil {
+				log.Fatal(err)
+				break
+			}
+			buf := make([]byte, 1024)
+			p.SetDeadline(time.Now().Add(10 * time.Second))
+			if n, err := p.Read(buf); err == nil {
+				log.Println("Add :", string(buf))
+				DefaultPool.Add(strings.TrimSpace(string(buf[:n])))
+				if strings.HasPrefix(string(buf), "http") {
+					DefaultPool.TestAll(testUrl)
+				}
+			}
+		}
+	}()
+
 	// if conn.ShowLog < 2 {
 	// 	// utils.ColorL("Local Listen:", listenAddr)
 
@@ -64,9 +92,9 @@ func Listen() (err error) {
 		go handleSocks5TcpAndUDP(p1, nil)
 
 	}
-	if RE_START > 0 {
-		Listen()
-	}
+	// if RE_START > 0 {
+	// 	Listen()
+	// }
 	return
 }
 
@@ -108,9 +136,7 @@ func LogErr(err error) bool {
 func handleBody(p1 net.Conn, dialer proxy.Dialer, host string) {
 	if NowConfig != "" {
 		if dialer == nil {
-
-			dialer = merkur.NewProxyDialer(NowConfig)
-
+			dialer = DefaultPool.GetDialer()
 		}
 		p2, err := dialer.Dial("tcp", host)
 		// log.Println("connecting ->", host)
@@ -129,7 +155,7 @@ func handleBody(p1 net.Conn, dialer proxy.Dialer, host string) {
 				LogErr(err)
 				return
 			}
-			log.Println("connected ->", host)
+			// log.Println("connected ->", host)
 			// PipeOne(p2, p1)
 			socks5.Pipe(p1, p2)
 		} else {
@@ -144,13 +170,29 @@ func handleBody(p1 net.Conn, dialer proxy.Dialer, host string) {
 func main() {
 	server := ""
 	proxyURI := ""
+	addUrl := ""
+	testURL := ""
 	flag.StringVar(&server, "l", "0.0.0.0:1080", "set liseten address.")
 	flag.StringVar(&proxyURI, "p", "", "can vmess:// | ss:// | ssr:// | order address (ssr/v2ray/ss) http https://somevps.com/order ")
+	flag.StringVar(&addUrl, "a", "", "add order /ss/ vmess / ssr ")
+	flag.StringVar(&testURL, "t", "https://www.google.com", "set a url to test ")
 	flag.Parse()
+
+	if addUrl != "" {
+		t, e := net.Dial("tcp", "localhost:10800")
+		if e != nil {
+			log.Println(e)
+			return
+		}
+		t.Write([]byte(addUrl))
+		os.Exit(0)
+	}
 
 	NowConfig = proxyURI
 	Configs.ListenHost = server
-	if err := Listen(); err != nil {
+	DefaultPool.Add(proxyURI)
+	DefaultPool.TestAll(testURL)
+	if err := Listen(testURL); err != nil {
 		log.Fatal(err)
 	}
 }
