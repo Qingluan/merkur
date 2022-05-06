@@ -104,19 +104,46 @@ func ParseVmessUri(u string) (cfg Config, err error) {
 	if strings.HasPrefix(u, "vmess://") {
 		u = u[8:]
 	}
+	s := make(map[string]interface{})
+
+	if strings.Contains(u, "?") {
+		fs := strings.SplitN(u, "?", 2)
+		u = fs[0]
+		for _, ii := range strings.Split(fs[1], "&") {
+			ifs := strings.SplitN(ii, "=", 2)
+			if ifs[0] == "obfs" {
+				s["type"] = ifs[1]
+			} else if ifs[0] == "alterId" {
+				s["aid"], _ = strconv.Atoi(ifs[1])
+			}
+		}
+	}
 	if dats, err = b64decode(u); err != nil {
 		return
 	} else {
 		// log.Println(dats)
 	}
-	s := make(map[string]interface{})
-	err = json.Unmarshal([]byte(dats), &s)
+	if strings.HasPrefix(dats, "{") && strings.HasSuffix(dats, "}") {
+		err = json.Unmarshal([]byte(dats), &s)
+		if err != nil {
+			log.Println("json parse err:", err, u)
 
-	if err != nil {
-		log.Println("json parse err:", err, u)
+			return
+		}
 
-		return
+	} else if strings.Contains(dats, "@") {
+		fs := strings.SplitN(dats, "@", 2)
+		pre_fs := strings.SplitN(fs[0], ":", 2)
+		end_fs := strings.SplitN(fs[1], ":", 2)
+
+		s["host"] = end_fs[0]
+		// s["aid"] = 0
+		s["port"], _ = strconv.Atoi(end_fs[1])
+		s["id"] = pre_fs[1]
+		// s["type"] = "none"
+		s["net"] = pre_fs[0]
 	}
+
 	// fmt.Println(s)
 
 	// ---------------------------------------
@@ -146,12 +173,21 @@ func ParseVmessUri(u string) (cfg Config, err error) {
 	// if netAddr,ok := s[""]
 
 	if ports, ok := s["port"]; ok {
-		cfg.ServerPort = int(ports.(float64))
+		if port, ok := ports.(float64); ok {
+			cfg.ServerPort = int(port)
+		} else if port, ok := ports.(int); ok {
+			cfg.ServerPort = port
+		}
 
 	}
 	if aids, ok := s["aid"]; ok {
 		// cfg.OptionID, _ = strconv.Atoi(aids.(string))
-		cfg.OptionID = int(aids.(float64))
+		if aid, ok := aids.(float64); ok {
+			cfg.OptionID = int(aid)
+		} else if aid, ok := aids.(int); ok {
+			cfg.OptionID = aid
+		}
+
 	}
 	if proto, ok := s["net"]; ok {
 		cfg.Protocol = proto.(string)

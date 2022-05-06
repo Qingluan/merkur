@@ -25,6 +25,7 @@ type VMess struct {
 
 // NewVMess returns a vmess proxy.
 func NewVMess(remote, uuid, sectp string, aid int, d proxy.Dialer) (*VMess, error) {
+	// fmt.Println("remote:", remote, "uuid:", uuid, "aid:", aid, "sec type:", sectp)
 
 	addr := remote
 	security := sectp
