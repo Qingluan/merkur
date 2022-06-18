@@ -1,10 +1,9 @@
 module github.com/Qingluan/merkur
 
-go 1.16
+go 1.14
 
 require (
 	github.com/aead/chacha20 v0.0.0-20180709150244-8b13a72661da
-	github.com/cheggaaa/pb v1.0.29 // indirect
 	github.com/cretz/bine v0.1.0
 	github.com/dgryski/go-camellia v0.0.0-20191119043421-69a8a13fb23d
 	github.com/dgryski/go-idea v0.0.0-20170306091226-d2fb45a411fb
